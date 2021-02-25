@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-  
 # This file is generated automatically through:
 #    d2lbook build lib
 # Don't edit it directly
@@ -1805,17 +1806,7 @@ def batchify(data):
 
 
 # Defined in file: ./chapter_natural-language-processing-pretraining/word-embedding-dataset.md
-def load_data_ptb(batch_size, max_window_size, num_noise_words):
-    num_workers = d2l.get_dataloader_workers()
-    sentences = read_ptb()
-    vocab = d2l.Vocab(sentences, min_freq=10)
-    subsampled = subsampling(sentences, vocab)
-    corpus = [vocab[line] for line in subsampled]
-    all_centers, all_contexts = get_centers_and_contexts(
-        corpus, max_window_size)
-    all_negatives = get_negatives(all_contexts, corpus, num_noise_words)
-
-    class PTBDataset(torch.utils.data.Dataset):
+class PTBDataset(torch.utils.data.Dataset):
         def __init__(self, centers, contexts, negatives):
             assert len(centers) == len(contexts) == len(negatives)
             self.centers = centers
@@ -1827,6 +1818,18 @@ def load_data_ptb(batch_size, max_window_size, num_noise_words):
 
         def __len__(self):
             return len(self.centers)
+            
+def load_data_ptb(batch_size, max_window_size, num_noise_words):
+    num_workers = d2l.get_dataloader_workers()
+    sentences = read_ptb()
+    vocab = d2l.Vocab(sentences, min_freq=10)
+    subsampled = subsampling(sentences, vocab)
+    corpus = [vocab[line] for line in subsampled]
+    all_centers, all_contexts = get_centers_and_contexts(
+        corpus, max_window_size)
+    all_negatives = get_negatives(all_contexts, corpus, num_noise_words)
+
+    
 
     dataset = PTBDataset(
         all_centers, all_contexts, all_negatives)
@@ -1997,7 +2000,7 @@ d2l.DATA_HUB['wikitext-2'] = (
 
 def _read_wiki(data_dir):
     file_name = os.path.join(data_dir, 'wiki.train.tokens')
-    with open(file_name, 'r') as f:
+    with open(file_name, 'r', encoding='utf-8') as f:
         lines = f.readlines()
     # Uppercase letters are converted to lowercase ones
     paragraphs = [line.strip().lower().split(' . ')
@@ -2150,7 +2153,7 @@ class _WikiTextDataset(torch.utils.data.Dataset):
 
 # Defined in file: ./chapter_natural-language-processing-pretraining/bert-dataset.md
 def load_data_wiki(batch_size, max_len):
-    num_workers = d2l.get_dataloader_workers()
+    num_workers = 0 #d2l.get_dataloader_workers()
     data_dir = d2l.download_extract('wikitext-2', 'wikitext-2')
     paragraphs = _read_wiki(data_dir)
     train_set = _WikiTextDataset(paragraphs, max_len)
